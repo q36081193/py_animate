@@ -12,6 +12,11 @@ class DrawApp:
         self.current_line_points = []  # 用于存储当前线条的坐标点列表
         self.all_lines = []  # 用于存储所有线条的坐标点列表
 
+        # 读取并调整图像大小
+        self.pic = Image.open("pic.png")
+        self.pic = self.pic.resize((100, 100), Image.Resampling.LANCZOS)
+        self.pic_center = (50, 50)  # 100x100图像的中心坐标
+
         # 绑定鼠标事件
         self.canvas.bind('<Button-1>', self.start_paint)
         self.canvas.bind('<B1-Motion>', self.paint)
@@ -60,6 +65,8 @@ class DrawApp:
         scale_x = 2000 / 500
         scale_y = 2000 / 500
 
+        filename = f'line.jpg'
+
         # 绘制所有线条
         for line_points in self.all_lines:
             # 存储放大后的坐标点
@@ -67,8 +74,19 @@ class DrawApp:
             # 在Pillow图像上绘制放大后的线条
             draw.line(scaled_points, fill='black', width=2)
 
+            # 将pic.png的正中心贴在线条的起点上
+            for idx, point in enumerate(scaled_points):
+                img_pic = Image.new('RGB', (2000, 2000), 'white')
+                filename_pic = f'line_pic_{idx}.jpg'                
+                x_offset = point[0] - self.pic_center[0]
+                y_offset = point[1] - self.pic_center[1]
+                img_pic.paste(self.pic, (x_offset, y_offset, x_offset + self.pic.width, y_offset + self.pic.height), self.pic)
+                img_pic.save(filename_pic, format='JPEG')
+
+
+
         # 保存图像为JPG文件
-        filename = f'line{len(self.all_lines)}.jpg'
+        # filename = f'line{len(self.all_lines)}.jpg'
         img.save(filename, format='JPEG')
 
 # 创建主窗口
